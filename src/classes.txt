@@ -1,0 +1,59 @@
+Global : Dictionary of peers in network
+Peer:
+  - Attributes:
+		 - Packet object
+		 - Peer ID
+		 - Neighbours - list of peer ids
+		 - LocalDir
+		 - Server port
+		 - Client port
+  - pre-initalised set of ips
+  - start a peer
+  - initiate ping req
+	check if ping req came from the ip:
+		if not:
+			ping in certain time intervals
+		else:
+			dont ping
+  - wait for pong
+      if pong packet comes back:
+		add it to list of peers in network  //only once
+  		add it to the current peer's neighbour list
+		stop pinging
+  - send pong req	
+		- create packet from the packet's source_address
+		- send it to the corresponding peer 
+
+QueryThread (clientThread)
+	- make packet	
+	- send it to neighbours (from neighbour list in Peer class)
+	- wait for QueryHit to respond
+		- if QueryHit packet comes:
+			- establish tcp connection to the source_address in the packet
+			- recieve file 
+			- write into LocalDir (download)
+	- initiate File Search thread
+	
+File Search - thread
+	- recieve packet from QueryThread
+	- check if file is present in that peer's local directory
+			call QueryHitThread
+	  else
+	  		store the source address
+			flag set to 1
+	   		call QueryThread
+
+QueryHitThread (serverThread)
+	- make packet
+	- if flag equal to 0
+			retrieve destination address and send it to that peer
+	  else
+	  		send to all peers in the reverse order
+	- get tcp connection from QueryThread
+		send file in bytes/objects (encrypt if possible)
+
+Main:
+	- start a peer 
+	- get details about the file that the peer wants
+	- start QueryThread	  
+
