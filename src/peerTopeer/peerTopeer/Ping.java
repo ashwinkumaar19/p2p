@@ -4,7 +4,6 @@ package peerTopeer;
 //import peerTopeer.*;
 import java.net.*;
 import java.io.*;
-import java.util.*;
 public class Ping extends Thread{
     Peer p;
     Packet pingPacket;
@@ -31,18 +30,7 @@ public class Ping extends Thread{
 
         //sending ping packet
 
-        /* 
-        String fileName = "config.txt";
-        Properties prop = new Properties();
-        InputStream is = new FileInputStream(fileName);
-		prop.load(is);
-
-        int toPing_peerID = 
-        */
-
-
-
-        Socket socket = new Socket(pingPacket.destination_address,5001);
+        Socket socket = new Socket(pingPacket.destination_address,p.clientPort);
         System.out.println("Connected to "+pingPacket.destination_address);
         OutputStream outputstream = socket.getOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputstream);
@@ -64,7 +52,6 @@ public class Ping extends Thread{
     }
     public void run() {
         try {
-            System.out.println("Inside Ping\n");
             this.createPacket();
         } catch(UnknownHostException u) {
             u.printStackTrace();

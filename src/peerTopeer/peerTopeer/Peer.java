@@ -27,7 +27,7 @@ public class Peer{
         this.serverPort = serverPort;
         this.clientPort = clientPort;
     }
-    public static void main(String[] args) throws IOException,InterruptedException{
+    public static void main(String[] args) throws IOException{
         
         //start a peer
         Scanner sc = new Scanner(System.in);
@@ -51,37 +51,30 @@ public class Peer{
         Peer p = new Peer(peerID,localDir,serverport,clientport);
         //start pinging
         
-        if (peerID == 1) {
-            int r=0;
-            while(r!=peerID) {
-                //Random random = new Random();
-                //r = random.nextInt(2); //change bound
-                //if (r==0) {
-                //    continue;
-                //}
-                //if (r!=0) {
-                    if (!Peer.alreadypinged.contains(r)) {
-                        //String dest_address = prop.getProperty("peer"+ r + ".ip");
-                        String dest_address = "10.1.66.139";
-                        System.out.println("Ip to ping to: " + dest_address);
-                        //Pong pong_thread = new Pong(p);
-                        //pong_thread.start();
-                        //pong_thread.join();
-                        Ping ping_thread = new Ping(p,dest_address);
-                        ping_thread.start();
-                        Peer.alreadypinged.add(r);
-                        break;
-                    }
-                    else {
-                        continue;
-                    }
-                }
-            }  else {
-            Pong pong_thread = new Pong(p);
-            pong_thread.start();
-            pong_thread.join();
+        int r=0;
+        while(r!=peerID) {
+            Random random = new Random();
+            r = random.nextInt(2); //change bound
+            if (r==0) {
+                continue;
             }
-        
+            if (r!=0) {
+                if (!Peer.alreadypinged.contains(r)) {
+                    String dest_address = prop.getProperty("peer"+ r + ".ip");
+                    System.out.println("Ip to ping to: " + dest_address);
+                    Pong pong_thread = new Pong(p);
+                    pong_thread.start();
+                    Ping ping_thread = new Ping(p,dest_address);
+                    ping_thread.start();
+                    Peer.alreadypinged.add(r);
+                    break;
+                }
+                else {
+                    continue;
+                }
+            }
+        }
+
         
         sc.close();   
     }

@@ -61,7 +61,6 @@ public class Pong extends Thread{
 
     public void run(){
         try{
-            System.out.println("Inside Pong\n");
             this.createConnection();
         } catch(Exception e) {
             e.printStackTrace();
