@@ -1,4 +1,6 @@
- package peerTopeer;
+package peerTopeer;
+
+//import peerTopeer.*;
 import java.util.*;
 import java.io.*;
 import java.net.*;
@@ -11,9 +13,9 @@ public class Peer{
     Packet ping;
     int peer_id;
     String localDir;
-    static ArrayList<String> connectedpeers = new ArrayList<String>();
-    ArrayList<Integer> neighbours = new ArrayList<Integer>();
-    static ArrayList<Integer> alreadypinged = new ArrayList<Integer>();
+    static ArrayList<String> connectedpeers = new ArrayList<String>(); //nodes that have send a ping and received a pong
+    ArrayList<Integer> neighbours = new ArrayList<Integer>(); //list of neighbours for each node
+    static ArrayList<Integer> alreadypinged = new ArrayList<Integer>(); //nodes that have sent atleast one ping request
     int serverPort;
     int clientPort;
     
@@ -47,20 +49,30 @@ public class Peer{
 		int clientport = Integer.parseInt(prop.getProperty("peer"+peerID+".clientport"));
         
         Peer p = new Peer(peerID,localDir,serverport,clientport);
-
         //start pinging
         
         int r=0;
         while(r!=peerID) {
             Random random = new Random();
-            r = random.nextInt(10); //change bound
-            if (r!=0){
-                String dest_address = prop.getProperty("peer"+ r + ".ip");
-                Ping ping_thread = new Ping(p,dest_address);
-                ping_thread.start();
-                Peer.alreadypinged.add(r);
+            r = random.nextInt(2); //change bound
+            if (r==0) {
+                continue;
             }
-
+            if (r!=0) {
+                if (!Peer.alreadypinged.contains(r)) {
+                    String dest_address = prop.getProperty("peer"+ r + ".ip");
+                    System.out.println("Ip to ping to: " + dest_address);
+                    Pong pong_thread = new Pong(p);
+                    pong_thread.start();
+                    Ping ping_thread = new Ping(p,dest_address);
+                    ping_thread.start();
+                    Peer.alreadypinged.add(r);
+                    break;
+                }
+                else {
+                    continue;
+                }
+            }
         }
 
         

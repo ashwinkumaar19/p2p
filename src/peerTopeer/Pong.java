@@ -1,15 +1,21 @@
 package peerTopeer;
 //Pong is like server
+//import peerTopeer.*;
 import java.net.*;
 import java.io.*;
-public class Pong{
+public class Pong extends Thread{
+    Peer p;
     Packet pongPacket;
-    Pong(){
+    String dest_address;
+    Pong(Peer p){
+        this.p = p;
         pongPacket = new Packet(); 
     }
-    public Packet createPacket(String dest_address,int id) throws UnknownHostException{
+    public Packet createPacket(String dest_address) throws UnknownHostException{
         InetAddress localhost = InetAddress.getLocalHost();
-        pongPacket.packetID = id;
+        pongPacket.packetID = Peer.id;
+        Peer.id++;
+        pongPacket.peer_id = p.peer_id;
         pongPacket.payload_Desc = "pong";
         pongPacket.TTL = 10; //change value
         pongPacket.source_address = new String(localhost.getHostAddress()); 
@@ -18,9 +24,9 @@ public class Pong{
         pongPacket.filename = null;
         return pongPacket;
     }
-    public String createConnection(int serverPort) throws IOException,ClassNotFoundException{
+    public String createConnection() throws IOException,ClassNotFoundException{
         //server socket waits for client to connect
-        ServerSocket socket = new ServerSocket(serverPort);
+        ServerSocket socket = new ServerSocket(p.serverPort);
         Socket connect = socket.accept();
         System.out.println("Connected to "+pongPacket.destination_address);
 
@@ -28,12 +34,13 @@ public class Pong{
         InputStream inputstream = connect.getInputStream();
         ObjectInputStream objectInputStream = new ObjectInputStream(inputstream);
         Packet receivedPacket = (Packet)objectInputStream.readObject();
+        this.dest_address = receivedPacket.source_address;
         if (receivedPacket!=null){
             System.out.println("Received a ping packet");
 
             //creates a pong packet and sends it
             Packet pong = new Packet();
-            pong = this.createPacket(receivedPacket.source_address,++receivedPacket.packetID);
+            pong = this.createPacket(this.dest_address);
             OutputStream outputstream = connect.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputstream);
             System.out.println("Sending a pong packet");
@@ -45,7 +52,19 @@ public class Pong{
             socket.close();
 
             return localIP; 
+        } else {
+            System.out.println("Invalid ping packet");
+            socket.close();
+            return null; 
         }
-        System.out.println("Invalid ping packet");       
+    }
+
+    public void run(){
+        try{
+            this.createConnection();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+        
     }
 }
